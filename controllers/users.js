@@ -1,31 +1,55 @@
-const User = require("../models/user");
+const User = require('../models/user');
 
 function errProcessing(err) {
-  if (err.name === "ValidationError") {
-    return {status: 400, message: "Некорректные входные данные"}
-  } if (err.name === "CastError") {
-    return {status: 404, message: "Запрашиваемый объект не найден"}
-  } else return {status: 500, message: "Что-то пошло не так..."}
+  if (err.name === 'ValidationError') {
+    return {
+      status: 400,
+      message:
+        'Имя и описание пользователя должны быть от 2 до 30 символов, URL аватара обязательна',
+    };
+  }
+  if (err.name === 'CastError') {
+    return {
+      status: 404,
+      message: 'Запрашиваемый объект не найден',
+    };
+  }
+  return {
+    status: 500,
+    message: 'Что-то пошло не так...',
+  };
 }
 
 const getUsersController = (req, res) => {
-  console.log(req.user._id);
   User.find()
+    // Сервер уже возвращает ошибку с кодом 404, если по переданному id пользователь не найден
     .then((user) => res.send({ data: user }))
-    .catch((err) => res.status(errProcessing(err).status).send({ message: errProcessing(err).message }));
+    .catch((err) => {
+      res
+        .status(errProcessing(err).status)
+        .send({ message: errProcessing(err).message });
+    });
 };
 
 const getUserController = (req, res) => {
   User.findById(req.params.userId)
     .then((user) => res.send({ data: user }))
-    .catch((err) => res.status(errProcessing(err).status).send({ message: errProcessing(err).message }));
+    .catch((err) => {
+      res
+        .status(errProcessing(err).status)
+        .send({ message: errProcessing(err).message });
+    });
 };
 
 const createUserController = (req, res) => {
   const { name, about, avatar } = req.body;
   User.create({ name, about, avatar })
-    .then((user) => res.send({ data: user }))
-    .catch((err) => res.status(errProcessing(err).status).send({ message: errProcessing(err).message }));
+    .then((user) => res.status(201).send({ data: { user, message: 'Created' } }))
+    .catch((err) => {
+      res
+        .status(errProcessing(err).status)
+        .send({ message: errProcessing(err).message });
+    });
 };
 
 const updateUserController = (req, res) => {
@@ -37,10 +61,21 @@ const updateUserController = (req, res) => {
       new: true, // обработчик then получит на вход обновлённую запись
       runValidators: true, // данные будут валидированы перед изменением
       upsert: false, // пользователь не будет создан
-    }
+    },
   )
-    .then((user) => res.send({ data: user }))
-    .catch((err) => res.status(errProcessing(err).status).send({ message: errProcessing(err).message }));
+    .then((user) => {
+      if (!user) {
+        const err = new Error('Объект не найден');
+        err.name = 'CastError';
+        throw err;
+      }
+      res.send({ data: user });
+    })
+    .catch((err) => {
+      res
+        .status(errProcessing(err).status)
+        .send({ message: errProcessing(err).message });
+    });
 };
 
 const updateUserAvatarController = (req, res) => {
@@ -49,13 +84,24 @@ const updateUserAvatarController = (req, res) => {
     req.user._id,
     { avatar },
     {
-      new: true, 
-      runValidators: true, 
+      new: true,
+      runValidators: true,
       upsert: false,
-    }
+    },
   )
-    .then((user) => res.send({ data: user }))
-    .catch((err) => res.status(errProcessing(err).status).send({ message: errProcessing(err).message }));
+    .then((user) => {
+      if (!user) {
+        const err = new Error('Объект не найден');
+        err.name = 'CastError';
+        throw err;
+      }
+      res.send({ data: user });
+    })
+    .catch((err) => {
+      res
+        .status(errProcessing(err).status)
+        .send({ message: errProcessing(err).message });
+    });
 };
 
 module.exports = {
