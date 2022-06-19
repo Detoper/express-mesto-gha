@@ -50,7 +50,7 @@ const getUserController = (req, res) => {
 const createUserController = (req, res) => {
   const { name, about, avatar } = req.body;
   User.create({ name, about, avatar })
-    .then((user) => res.status(201).send({ data: { user, message: 'Created' } }))
+    .then(() => res.status(201).send({ data: { user: { name, about, avatar }, message: 'Created' } }))
     .catch((err) => {
       res
         .status(errProcessing(err).status)
