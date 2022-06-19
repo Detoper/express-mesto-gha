@@ -35,9 +35,7 @@ const createCardController = (req, res) => {
         .send({ message: errProcessing(err).message });
     });
 };
-// в 3-х роутах ниже добавил предварительный поиск по айди, но без него
-// Монго и так выкидывает ошибку, если карточки нет. Обрабатываю её в блоке catch
-// не вижу смысла в доп проверке, т.к это влияет на производительность
+
 const deleteCardController = (req, res) => {
   Card.findById(req.params.cardId)
     .then(() => Card.findByIdAndRemove(req.params.cardId))

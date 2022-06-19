@@ -22,7 +22,6 @@ function errProcessing(err) {
 
 const getUsersController = (req, res) => {
   User.find()
-    // Сервер уже возвращает ошибку с кодом 404, если по переданному id пользователь не найден
     .then((user) => res.send({ data: user }))
     .catch((err) => {
       res
@@ -33,7 +32,14 @@ const getUsersController = (req, res) => {
 
 const getUserController = (req, res) => {
   User.findById(req.params.userId)
-    .then((user) => res.send({ data: user }))
+    .then((user) => {
+      if (!user) {
+        const err = new Error('Объект не найден');
+        err.name = 'CastError';
+        throw err;
+      }
+      res.send({ data: user });
+    })
     .catch((err) => {
       res
         .status(errProcessing(err).status)
