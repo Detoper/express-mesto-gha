@@ -1,4 +1,5 @@
 const router = require('express').Router();
+const { celebrate, Joi } = require('celebrate');
 
 const {
   getCardsController,
@@ -12,19 +13,36 @@ router.get('/cards', (req, res) => {
   getCardsController(req, res);
 });
 
-router.post('/cards', (req, res) => {
+router.post('/cards', celebrate({
+  body: Joi.object().keys({
+    name: Joi.string().required().min(2).max(30),
+    link: Joi.string().required(),
+  }),
+}), (req, res) => {
   createCardController(req, res);
 });
 
-router.delete('/cards/:cardId', (req, res) => {
+router.delete('/cards/:cardId', celebrate({
+  headers: Joi.object().keys({
+    cardId: Joi.string().required(),
+  }),
+}), (req, res) => {
   deleteCardController(req, res);
 });
 
-router.put('/cards/:cardId/likes', (req, res) => {
+router.put('/cards/:cardId/likes', celebrate({
+  headers: Joi.object().keys({
+    cardId: Joi.string().required(),
+  }),
+}), (req, res) => {
   addLikeController(req, res);
 });
 
-router.delete('/cards/:cardId/likes', (req, res) => {
+router.delete('/cards/:cardId/likes', celebrate({
+  headers: Joi.object().keys({
+    cardId: Joi.string().required(),
+  }),
+}), (req, res) => {
   removeLikeController(req, res);
 });
 

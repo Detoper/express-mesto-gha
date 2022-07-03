@@ -1,36 +1,12 @@
 const User = require('../models/user');
 
-function errProcessing(err) {
-  if (err.name === 'ValidationError') {
-    return {
-      status: 400,
-      message:
-        'Имя и описание пользователя должны быть от 2 до 30 символов, URL аватара обязательна',
-    };
-  }
-  if (err.name === 'CastError') {
-    return {
-      status: 404,
-      message: 'Запрашиваемый объект не найден',
-    };
-  }
-  return {
-    status: 500,
-    message: 'Что-то пошло не так...',
-  };
-}
-
-const getUsersController = (req, res) => {
+const getUsersController = (req, res, next) => {
   User.find()
     .then((user) => res.send({ data: user }))
-    .catch((err) => {
-      res
-        .status(errProcessing(err).status)
-        .send({ message: errProcessing(err).message });
-    });
+    .catch(next);
 };
 
-const getUserController = (req, res) => {
+const getUserController = (req, res, next) => {
   User.findById(req.params.userId)
     .then((user) => {
       if (!user) {
@@ -40,33 +16,32 @@ const getUserController = (req, res) => {
       }
       res.send({ data: user });
     })
-    .catch((err) => {
-      res
-        .status(errProcessing(err).status)
-        .send({ message: errProcessing(err).message });
-    });
+    .catch(next);
 };
 
-const createUserController = (req, res) => {
-  const { name, about, avatar } = req.body;
-  User.create({ name, about, avatar })
-    .then((user) => res.status(201).send({ data: { user, message: 'Created' } }))
-    .catch((err) => {
-      res
-        .status(errProcessing(err).status)
-        .send({ message: errProcessing(err).message });
-    });
+const getMeController = (req, res, next) => {
+  console.log(req.user._id);
+  User.findById(req.user._id)
+    .then((user) => {
+      if (!user) {
+        const err = new Error('Объект не найден');
+        err.name = 'CastError';
+        throw err;
+      }
+      res.send({ data: user });
+    })
+    .catch(next);
 };
 
-const updateUserController = (req, res) => {
+const updateUserController = (req, res, next) => {
   const { name, about } = req.body;
   User.findByIdAndUpdate(
     req.user._id,
     { name, about },
     {
-      new: true, // обработчик then получит на вход обновлённую запись
-      runValidators: true, // данные будут валидированы перед изменением
-      upsert: false, // пользователь не будет создан
+      new: true,
+      runValidators: true,
+      upsert: false,
     },
   )
     .then((user) => {
@@ -77,14 +52,10 @@ const updateUserController = (req, res) => {
       }
       res.send({ data: user });
     })
-    .catch((err) => {
-      res
-        .status(errProcessing(err).status)
-        .send({ message: errProcessing(err).message });
-    });
+    .catch(next);
 };
 
-const updateUserAvatarController = (req, res) => {
+const updateUserAvatarController = (req, res, next) => {
   const { avatar } = req.body;
   User.findByIdAndUpdate(
     req.user._id,
@@ -103,17 +74,13 @@ const updateUserAvatarController = (req, res) => {
       }
       res.send({ data: user });
     })
-    .catch((err) => {
-      res
-        .status(errProcessing(err).status)
-        .send({ message: errProcessing(err).message });
-    });
+    .catch(next);
 };
 
 module.exports = {
   getUsersController,
   getUserController,
-  createUserController,
   updateUserController,
   updateUserAvatarController,
+  getMeController,
 };
