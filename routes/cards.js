@@ -24,7 +24,7 @@ router.post('/cards', celebrate({
 
 router.delete('/cards/:cardId', celebrate({
   params: Joi.object().keys({
-    postId: Joi.string().hex().length(24),
+    cardId: Joi.string().hex().length(24),
   }),
 }), (req, res) => {
   deleteCardController(req, res);
@@ -32,7 +32,7 @@ router.delete('/cards/:cardId', celebrate({
 
 router.put('/cards/:cardId/likes', celebrate({
   params: Joi.object().keys({
-    postId: Joi.string().hex().length(24),
+    cardId: Joi.string().hex().length(24),
   }),
 }), (req, res) => {
   addLikeController(req, res);
