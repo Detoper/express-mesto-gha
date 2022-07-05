@@ -20,7 +20,6 @@ const getUserController = (req, res, next) => {
 };
 
 const getMeController = (req, res, next) => {
-  console.log(req.user._id);
   User.findById(req.user._id)
     .then((user) => {
       if (!user) {

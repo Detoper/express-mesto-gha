@@ -23,14 +23,17 @@ router.post('/cards', celebrate({
 });
 
 router.delete('/cards/:cardId', celebrate({
-  headers: Joi.object().keys({
-    cardId: Joi.string().required(),
+  params: Joi.object().keys({
+    postId: Joi.string().alphanum().length(24),
   }),
 }), (req, res) => {
   deleteCardController(req, res);
 });
 
 router.put('/cards/:cardId/likes', celebrate({
+  params: Joi.object().keys({
+    postId: Joi.string().alphanum().length(24),
+  }),
   headers: Joi.object().keys({
     cardId: Joi.string().required(),
   }),
@@ -39,6 +42,9 @@ router.put('/cards/:cardId/likes', celebrate({
 });
 
 router.delete('/cards/:cardId/likes', celebrate({
+  params: Joi.object().keys({
+    cardId: Joi.string().alphanum().length(24),
+  }),
   headers: Joi.object().keys({
     cardId: Joi.string().required(),
   }),

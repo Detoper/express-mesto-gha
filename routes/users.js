@@ -15,9 +15,17 @@ router.get('/users', (req, res) => {
 router.get('/users/me', (req, res) => {
   getMeController(req, res);
 });
-router.get('/users/:userId', (req, res) => {
-  getUserController(req, res);
-});
+router.get(
+  '/users/:userId',
+  celebrate({
+    params: Joi.object().keys({
+      userId: Joi.string().alphanum().length(24),
+    }),
+  }),
+  (req, res) => {
+    getUserController(req, res);
+  },
+);
 
 router.patch('/users/me', celebrate({
   body: Joi.object().keys({
