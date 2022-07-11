@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const { celebrate, Joi, errors } = require('celebrate');
+const cors = require('cors');
 
 const PORT = 3000;
 const app = express();
@@ -15,7 +16,7 @@ const auth = require('./middlewares/auth');
 const { errProcessing } = require('./errors/err');
 
 app.use(bodyParser.json());
-
+app.usre(cors());
 mongoose.connect('mongodb://localhost:27017/mestodb', {
   useUnifiedTopology: true,
   useNewUrlParser: true,
